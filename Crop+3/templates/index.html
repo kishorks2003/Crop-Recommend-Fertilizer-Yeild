@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Support</title>
+    <link rel="stylesheet" href="style.css"> <!-- Linking External CSS -->
+    <style>
+        /* Reset and Global Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+    font-family: Arial, sans-serif;
+    scroll-behavior: smooth;
+    scroll-padding-top: 70px;
+}
+
+/* Navbar Styles */
+.navbar {
+    background: #2E8B57;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1000;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.navbar a:hover {
+    background: white;
+    color: #2E8B57;
+    border-radius: 5px;
+}
+
+/* Hero Section */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: url('/static/farm.jpg') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Two Column Layout */
+.container {
+    display: flex;
+    justify-content: space-around;
+    padding: 50px;
+    gap: 20px;
+    margin-top: 100px;
+}
+
+/* Left Column - Form */
+.left {
+    flex: 1;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f9f9f9;
+    text-align: center;
+}
+
+/* Right Column - Output */
+.right {
+    flex: 1;
+    padding: 20px;
+    border-radius: 10px;
+    background: #e9f5e9;
+    text-align: center;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+input, select {
+    padding: 8px;
+    width: 80%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #228B22;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #1C6B1C;
+}
+
+/* Loading Message */
+.loading {
+    display: none;
+    color: #FF4500;
+    font-weight: bold;
+}
+
+/* Results */
+.crop-container {
+        display: flex;
+        flex-direction: column; /* Align items vertically */
+        align-items: center; /* Center items horizontally */
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+        .crop-item {
+            text-align: center;
+            width: 100%; /* Full width to maintain consistency */
+        }
+
+        .crop-item img {
+            width: 300px;
+            height: 200px; /* Ensure all images have the same height */
+            object-fit: cover; /* Prevent distortion */
+            border-radius: 10px;
+        }
+/* Footer */
+.footer {
+    background: black;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .left, .right {
+        width: 100%;
+    }
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="#home">Home</a>
+        <a href="#predict">Prediction</a>
+        <a href="#contact">Contact</a>
+    </div>
+
+    <div class="hero" id="home">
+        Empowering Farmers with Data-Driven Insights
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="container" id="predict">
+        <!-- Left Column: Crop Recommendation Form -->
+        <div class="left">
+            <h2>Crop Recommendation System</h2>
+            <form method="POST" action="/predict#predict" onsubmit="showLoading()">
+                <label>Nitrogen:</label> <input type="number" name="Nitrogen" step="any" required><br>
+                <label>Phosphorus:</label> <input type="number" name="Phosphorus" step="any" required><br>
+                <label>Potassium:</label> <input type="number" name="Potassium" step="any" required><br>
+                <label>Temperature (°C):</label> <input type="number" name="Temperature" step="0.1" required><br>
+                <label>Humidity (%):</label> <input type="number" name="Humidity" step="0.1" required><br>
+                <label>pH Level:</label> <input type="number" name="pH" step="0.01" required><br>
+                <label>Rainfall (mm):</label> <input type="number" name="Rainfall" step="0.1" required><br>
+                <label>Soil Type:</label>
+                <select name="Soil_Type" required>
+                    {% for soil in soil_types %}
+                    <option value="{{ soil }}">{{ soil }}</option>
+                    {% endfor %}
+                </select><br><br>
+                <button type="submit">Predict Crop</button>
+            </form>
+            <p class="loading" id="loadingMessage">Predicting... Please wait.</p>
+        </div>
+
+        <!-- Right Column: Prediction Results -->
+        <div class="right">
+            <h2>Crop Prediction Results</h2>
+            {% if error %}
+                <h2 style="color: red;">{{ error }}</h2>
+            {% endif %}
+
+            {% if crops %}
+                <h2>Recommended Crops</h2>
+                <div class="crop-container">
+                    {% for crop in crops %}
+                        <div class="crop-item">
+                            <img src="{{ crop_images.get(crop, '/static/default_crop.jpg') }}" alt="{{ crop }}" width="200">
+                            <p><b>{{ crop }}</b></p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <h2>Recommended Fertilizer: {{ fertilizer }}</h2>
+                <h2>Estimated Yield: {{ yield_prediction }} kg/hectare</h2>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="footer" id="contact">
+        <h2>Contact Us</h2>
+        <p>Email: support@smartfarming.com | Phone: +91-9876543210</p>
+        <p>&copy; 2025 Smart Farming System</p>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById("loadingMessage").style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
