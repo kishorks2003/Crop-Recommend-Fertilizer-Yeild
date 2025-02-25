@@ -34,7 +34,7 @@ yield_model = load_model('models/yield_model.pkl')
 scaler = load_model('models/scaler.pkl')
 
 # Load dataset for crop and soil types
-df = pd.read_csv(r'datasets/agriculture_dataset.csv')
+df = pd.read_csv('datasets/agriculture_dataset.csv')
 crop_types = df['Crop_Type'].unique().tolist()
 soil_types = df['Soil_Type'].unique().tolist()
 soil_mapping = {soil: idx for idx, soil in enumerate(soil_types)}
